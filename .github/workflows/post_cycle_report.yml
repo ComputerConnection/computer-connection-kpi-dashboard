@@ -1,0 +1,9 @@
+name: Post Cycle Report
+on:
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "post cycle report"

@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  reverse-proxy:
+    image: caddy:2
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile
+    ports:
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+  prefect:
+    image: prefecthq/prefect:2-latest
+    volumes:
+      - ./infra/prefect:/root/.prefect
+    ports:
+      - "4200:4200"
+  etl-agent:
+    build: ./etl
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  redis:
+    image: redis:7
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+volumes:
+  db-data:
