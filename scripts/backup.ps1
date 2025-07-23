@@ -1,7 +1,12 @@
 param(
     [string]$BackupDir = "$PSScriptRoot\..\backups",
-    [int]$Keep = 7
+    [int]$Keep = 7,
+    [string]$Container = 'db',
+    [string]$Database  = 'postgres',
+    [string]$User      = 'postgres'
 )
+
+Set-StrictMode -Version Latest
 
 if (-not (Test-Path $BackupDir)) {
     New-Item -ItemType Directory -Path $BackupDir | Out-Null
@@ -12,7 +17,7 @@ $dumpPath = Join-Path $BackupDir "postgres_$timestamp.sql"
 $archivePath = "$dumpPath.zip"
 
 Write-Host "Creating dump $dumpPath"
-docker exec db pg_dump -U postgres postgres > $dumpPath
+docker compose exec -T $Container pg_dump -U $User $Database > $dumpPath
 
 Write-Host "Compressing $dumpPath"
 Compress-Archive -Path $dumpPath -DestinationPath $archivePath

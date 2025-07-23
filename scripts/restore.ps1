@@ -1,7 +1,12 @@
 param(
     [Parameter(Mandatory=$true)]
-    [string]$BackupFile
+    [string]$BackupFile,
+    [string]$Container = 'db',
+    [string]$Database  = 'postgres',
+    [string]$User      = 'postgres'
 )
+
+Set-StrictMode -Version Latest
 
 if (-not (Test-Path $BackupFile)) {
     Write-Error "Backup file not found"
@@ -18,10 +23,10 @@ if ($BackupFile -like '*.zip') {
 
 docker compose down
 
-docker compose up -d db
+docker compose up -d $Container
 
 Write-Host "Restoring $BackupFile"
-docker exec -i db psql -U postgres postgres < $BackupFile
+docker compose exec -T $Container psql -U $User $Database < $BackupFile
 
 docker compose up -d
 
