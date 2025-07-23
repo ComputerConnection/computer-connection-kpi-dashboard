@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from .auth import router as auth_router
 from .auth.middleware import auth_middleware
+from .audit import router as audit_router
 
 app = FastAPI()
 
@@ -11,4 +12,5 @@ def health():
 
 
 app.include_router(auth_router)
+app.include_router(audit_router)
 app.middleware("http")(auth_middleware)
