@@ -1,197 +1,91 @@
-# computer-connection-kpi-dashboard
-KPI Dashboard – Local‑First (Windows) MVP
+# KPI Dashboard – Local-First (Windows)
 
-One URL to see the truth about your business & life. Local-first, mock-data ready, API‑switchable.
+> One URL to see business + personal KPIs. Runs on your PC with Docker. Starts with mock data; flip a flag for real APIs.
 
-1. What Is This?
+## Quick Start (Windows 11)
 
-A modular, self‑hosted dashboard for Zach Henry (Computer Connection, OKC) that aggregates business + personal KPIs (sales, margin, quotes, repairs, cash, habits) into a single UI. Runs entirely on your Windows box via Docker Desktop/WSL2. Starts with mock data; flip a flag to pull from real APIs when creds are ready.
+**Prereqs:** Docker Desktop (WSL2), Git, PowerShell 7+
 
-2. Quick Start (Windows 11)
-
-Prereqs
-
-Docker Desktop (WSL2 backend enabled)
-
-Git & PowerShell 7+
-
-Clone & Run
-
-git clone https://github.com/computer-connection/kpi-dashboard.git
+```powershell
+git clone https://github.com/<org>/kpi-dashboard.git
 cd kpi-dashboard
-cp .env.sample .env.dev   # or copy manually
-# (edit .env.dev if you want – defaults are fine for mocks)
-
+Copy-Item .env.sample .env.dev
 ./scripts/dev_up.ps1 -Rebuild
+```
 
-Then open:
+Open:
 
-UI: https://dashboard.local/
+- UI: https://dashboard.local/ (or https://localhost/)
+- API: https://dashboard.local/api/v1/health
+- GraphQL: https://dashboard.local/graphql
+- Prefect: http://localhost:4200
+- Mailhog: http://localhost:8025
 
-API Health: https://dashboard.local/api/v1/health
+## Stack
 
-GraphQL IDE: https://dashboard.local/graphql
+| Layer        | Tech                                      | Path         |
+| ------------ | ----------------------------------------- | ------------ |
+| Frontend     | React + Vite + Tailwind + Zustand + Recharts | frontend/    |
+| Backend      | FastAPI + Strawberry GraphQL              | backend/     |
+| Data         | Postgres + SQLAlchemy/Views               | infra/db/    |
+| ETL          | Prefect 2.x                               | etl/         |
+| Cache        | Redis                                     | (docker svc) |
+| Proxy        | Caddy                                     | infra/Caddyfile |
 
-Prefect UI: http://localhost:4200
+## Env & Secrets
 
-Mailhog (dev email): http://localhost:8025
+Mock mode: `USE_MOCK_DATA=true` (default).
+Real mode: put creds in `.env.prod`, set `USE_MOCK_DATA=false`.
+Never commit real secrets.
 
-If the browser complains about certs, import Caddy’s internal CA (instructions in /docs/ops-runbook.md) or just bypass in dev.
+## Commands
 
-3. Stack Overview
-
-Layer
-
-Tech
-
-Path
-
-Frontend
-
-React + Vite + Tailwind + Zustand + Recharts
-
-frontend/
-
-Backend API
-
-FastAPI (REST) + Strawberry GraphQL
-
-backend/app/
-
-Data/DB
-
-PostgreSQL + SQLAlchemy + materialized views
-
-infra/db/
-
-Orchestration
-
-Prefect 2.x (Orion)
-
-etl/flows/
-
-Cache/Queue
-
-Redis
-
-docker service redis
-
-Reverse Proxy
-
-Caddy (TLS, routing)
-
-infra/Caddyfile
-
-4. Environment & Secrets
-
-Mock mode: USE_MOCK_DATA=true (default), uses JSON generators to seed the DB.
-
-Real mode: Set creds in .env.prod (never commit). Toggle USE_MOCK_DATA=false.
-
-.env.sample lists all variables; copy to .env.dev or .env.prod.
-
-Optional: run Vaultwarden/HashiCorp Vault and point services to it (see /docs/ops-runbook.md).
-
-5. Common Commands
-
-# Start dev stack (detached)
-./scripts/dev_up.ps1
-
-# Rebuild containers
+```powershell
+./scripts/dev_up.ps1                # start
 docker compose down --remove-orphans
-./scripts/dev_up.ps1 -Rebuild
+./scripts/dev_up.ps1 -Rebuild       # rebuild
+python ./scripts/seed_mock_data.py  # seed data
+cd backend; poetry run pytest       # backend tests
+cd frontend; npm run lint && npm run build  # frontend
+./scripts/backup.ps1                # backup DB
+```
 
-# Seed mock data manually
-python ./scripts/seed_mock_data.py
+## Structure
 
-# Run backend tests
-cd backend; poetry run pytest --cov=app
-
-# Run frontend lint/build
-cd frontend; npm run lint && npm run build
-
-# Backup database (PowerShell)
-./scripts/backup.ps1
-
-6. Project Structure
-
+```
 kpi-dashboard/
-├─ backend/              # FastAPI + GraphQL
-├─ frontend/             # React app
-├─ etl/                  # Prefect flows, mocks
-├─ infra/                # Caddy, DB init, Prefect config
-├─ scripts/              # PowerShell + Python helpers
-├─ docs/                 # Deep docs (architecture, formulas, runbook)
-├─ docker-compose.yml
-├─ .github/workflows/    # CI pipelines
-└─ .env.sample
+  backend/
+  frontend/
+  etl/
+  infra/
+  scripts/
+  docs/
+  docker-compose.yml
+  .env.sample
+  .github/workflows/
+```
 
-7. Contributing & Workflow
+## Workflow
 
-Branch naming: feature/<short-desc>, fix/<short-desc>, chore/...
+Issues → feature branches → PR → merge.
 
-Issues: Use EPIC → Story → Task hierarchy. Link PRs to issues.
+## Roadmap
 
-PR checklist: Code + tests + docs updated, migrations included, CI green.
+- ✅ Mock MVP local
+- 🔜 Real API connectors
+- 🔜 Automation hooks
+- 🔜 Forecasting/AI
+- 🔜 Plugin/widget manifest
 
-Commits: Conventional commits preferred (feat:, fix:, docs: …).
+## Troubleshooting
 
-See /docs/contributing.md for details.
+| Problem                       | Cause             | Fix                                      |
+| ----------------------------- | ----------------- | ---------------------------------------- |
+| dashboard.local not loading   | Host entry missing| Use localhost or add to hosts file       |
+| HTTPS warning                 | Self-signed TLS   | Import Caddy CA or use HTTP in dev       |
+| Prefect UI blank              | Port conflict     | Change port or stop conflicting app      |
+| Docker errors on paths        | WSL path quirks   | Keep repo in local disk, restart Docker  |
 
-8. Roadmap
+## License & Contact
 
-✅ Local mock MVP
-
-🔜 Real API connectors (Lightspeed, WooCommerce, QuoteMachine, QBO, Stripe, HubSpot, Meta Ads)
-
-🔜 Automation hooks (SMS follow-ups, HubSpot sequences)
-
-🔜 Forecasting/AI insights
-
-🔜 Plugin/widget manifest
-
-Track progress in GitHub Projects/Issues under EPIC: Unified KPI Dashboard MVP (Local Windows).
-
-9. Troubleshooting
-
-Symptom
-
-Likely Cause
-
-Fix
-
-dashboard.local won’t load
-
-Hostname not resolved
-
-Add to C:\Windows\System32\drivers\etc\hosts or use localhost
-
-HTTPS cert warning
-
-Self-signed TLS
-
-Import Caddy root CA or use HTTP in dev
-
-Prefect UI blank
-
-Port conflict
-
-Change port in compose or stop other service
-
-Docker permission errors
-
-WSL path issues
-
-Ensure repo in WSL-friendly path, restart Docker Desktop
-
-More in /docs/ops-runbook.md.
-
-10. License & Credits
-
-Proprietary for now (Computer Connection internal). Update when/if open-sourcing.
-
-Built by Zach + autonomous agents. ♥
-
-11. Contact / Support
-
-Open a GitHub issue or ping via your internal comms channel. For urgent breakages, mark the issue as sev1
+Proprietary (internal). Open a GitHub issue for help.
