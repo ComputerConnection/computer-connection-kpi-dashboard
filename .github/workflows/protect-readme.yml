@@ -1,0 +1,14 @@
+name: Protect README
+on: [pull_request]
+jobs:
+  check-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if README changed without approval
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          if git diff --name-only origin/${{ github.base_ref }}..HEAD | grep -q '^README.md$'; then
+            echo "README.md was modified. Ensure CODEOWNERS approval." && exit 1
+          else
+            echo "README unchanged."
+          fi
