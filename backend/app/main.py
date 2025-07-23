@@ -8,6 +8,7 @@ from .actions.router import router as actions_router
 
 app = FastAPI()
 
+
 @app.get("/api/v1/health")
 def health():
     return {"status": "ok"}

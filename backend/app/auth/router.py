@@ -128,3 +128,4 @@ def assign_role_endpoint(name: str, email: EmailStr, user: str | None = Depends(
     assign_role(email, name)
     log_event(user, "role_assign", {"role": name, "user": email})
     return {"assigned": name, "user": email}
+

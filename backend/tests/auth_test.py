@@ -80,3 +80,4 @@ def test_rate_limit(monkeypatch):
         client.post("/api/v1/auth/request-link", json={"email": "rate@example.com"})
     r = client.post("/api/v1/auth/request-link", json={"email": "rate@example.com"})
     assert r.status_code == 429
+
