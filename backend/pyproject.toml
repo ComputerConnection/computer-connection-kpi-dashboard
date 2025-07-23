@@ -9,6 +9,13 @@ python = "^3.10"
 fastapi = "*"
 udatetime = "*"
 uvicorn = {extras = ["standard"], version = "*"}
+PyJWT = "*"
+pytest = {version="*", optional=true}
+httpx = "*"
+email-validator = "*"
+
+[tool.poetry.extras]
+test = ["pytest"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
