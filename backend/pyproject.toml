@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "kpi-backend"
+version = "0.1.0"
+description = "Backend API for KPI Dashboard"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.104.1"
+uvicorn = "^0.23.2"
+
+[tool.poetry.group.dev.dependencies]
+httpx = "^0.27"
+pytest = "^7.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
